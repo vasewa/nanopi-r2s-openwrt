@@ -1,6 +1,15 @@
 name: NanoPi R2S OpenWrt
 
-on: repository_dispatch
+on:
+
+#  push:
+#    branches:
+#      - openwrt-master
+#  schedule:
+#    - cron: 20 02 * * *
+  gollum:
+#  watch:
+#    types: [started]
 
 jobs:
   OpenWrt-18_06:
@@ -32,6 +41,7 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         patch -p1 < "${GITHUB_WORKSPACE}/patches/1806-modify_for_r2s.patch"
+        patch -p1 < "${GITHUB_WORKSPACE}/patches/set_default_ipaddr_to_192.168.50.1.patch"
     - name: Build OpenWrt-18.06
       run: |
         cd "/home/runner/openwrt"
@@ -49,11 +59,6 @@ jobs:
         mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz" "../openwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz"
         mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "../openwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
         mv -f "bin/targets/rockchip/armv8/sha256sums" "../openwrt-18.06-sha256sums"
-    - name: Upload OpenWrt-18.06 Firmwares to Cloud
-      timeout-minutes: 30
-      run: |
-        cd "/home/runner"
-        ${GITHUB_WORKSPACE}/scripts/upload_firmware.sh "18.06" "${{ secrets.TELEGRAM_BOT_TOKEN }}" || exit 0
     - name: Upload OpenWrt-18.06 SHA256SUM Hash
       uses: actions/upload-artifact@v2
       with:
@@ -98,6 +103,7 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         patch -p1 < "${GITHUB_WORKSPACE}/patches/snapshot-modify_for_r2s.patch"
+        patch -p1 < "${GITHUB_WORKSPACE}/patches/set_default_ipaddr_to_192.168.50.1.patch"
     - name: Build OpenWrt-Snapshot
       run: |
         cd /home/runner/openwrt
@@ -115,11 +121,6 @@ jobs:
         mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz" "../openwrt-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-ext4-sysupgrade.img.gz"
         mv -f "bin/targets/rockchip/armv8/openwrt-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz" "../openwrt-snapshot-rockchip-armv8-friendlyarm_nanopi-r2s-squashfs-sysupgrade.img.gz"
         mv -f "bin/targets/rockchip/armv8/sha256sums" "../openwrt-snapshot-sha256sums"
-    - name: Upload OpenWrt-Snapshot Firmwares to Cloud
-      timeout-minutes: 30
-      run: |
-        cd "/home/runner"
-        ${GITHUB_WORKSPACE}/scripts/upload_firmware.sh "snapshot" "${{ secrets.TELEGRAM_BOT_TOKEN }}" || exit 0
     - name: Upload OpenWrt-Snapshot SHA256SUM Hash
       uses: actions/upload-artifact@v2
       with:
